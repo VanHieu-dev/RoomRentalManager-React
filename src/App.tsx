@@ -6,7 +6,7 @@ import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
 import Search from "./Components/Search/search";
 import AddressDropdown from "./Components/test";
-import SignupTest from "./pages/SingupTest";
+import SignupTest from "./pages/Singup";
 
 function App() {
   return (
