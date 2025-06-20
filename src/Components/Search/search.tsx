@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import type { AddressData } from '../../type';
-import Dropdown from './dropdown'; 
+import DropDown from './dropdown'; 
+import { getToken } from '../../utils/auth';
+
+const token = getToken();
 
 const Search = () => {
   const [provinces, setProvinces] = useState<AddressData[]>([]);
@@ -29,7 +32,11 @@ const Search = () => {
     (async () => {
       setLoading((l) => ({ ...l, province: true }));
       try {
-        const res = await fetch('https://provinces.open-api.vn/api/p/');
+        const res = await fetch('http://localhost:8080/api/provinces/getAll', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         const data = await res.json();
         setProvinces(Array.isArray(data) ? data : []);
       } catch (err) {
@@ -42,7 +49,7 @@ const Search = () => {
 
   // Fetch districts when province is selected
   useEffect(() => {
-    if (!selectedProvince) return;
+    if (!selectedProvince?.provinceId) return;
     (async () => {
       setLoading((l) => ({ ...l, district: true }));
       setSelectedDistrict(null);
@@ -50,10 +57,15 @@ const Search = () => {
       setWards([]);
       try {
         const res = await fetch(
-          `https://provinces.open-api.vn/api/p/${selectedProvince.code}?depth=2`,
+          `http://localhost:8080/api/districts/getByProvince/${selectedProvince.provinceId}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }
         );
         const data = await res.json();
-        setDistricts(data.districts || []);
+        setDistricts(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error('Lỗi khi tải danh sách quận/huyện', err);
       } finally {
@@ -64,16 +76,23 @@ const Search = () => {
 
   // Fetch wards when district is selected
   useEffect(() => {
-    if (!selectedDistrict) return;
+    if (!selectedDistrict?.districtId) return;
     (async () => {
       setLoading((l) => ({ ...l, ward: true }));
       setSelectedWard(null);
       try {
         const res = await fetch(
-          `https://provinces.open-api.vn/api/d/${selectedDistrict.code}?depth=2`,
+          `http://localhost:8080/api/wards/getByDistrict/${selectedDistrict.districtId}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }
         );
         const data = await res.json();
-        setWards(data.wards || []);
+        console.log(data);
+        
+        setWards(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error('Lỗi khi tải danh sách phường/xã', err);
       } finally {
@@ -85,9 +104,13 @@ const Search = () => {
   // Cập nhật địa chỉ khi cả ba cấp đều được chọn
   useEffect(() => {
     if (selectedProvince && selectedDistrict && selectedWard) {
-      const address = [selectedWard.name, selectedDistrict.name, selectedProvince.name].join(', ');
+      const address = [
+        selectedWard.wardName,
+        selectedDistrict.districtName,
+        selectedProvince.provinceName
+      ].join(', ');
       setFullAddress(address);
-      console.log('Địa chỉ đầy đủ:', address); // Log địa chỉ khi hoàn tất
+      console.log('Địa chỉ đầy đủ:', address);
     } else {
       setFullAddress('Chưa chọn đầy đủ địa chỉ');
     }
@@ -150,7 +173,7 @@ const Search = () => {
     <div className="p-10 bg-white text-gray-800 font-sans">
       <div className="space-y-6 max-w-sm dropdown-container">
         {dropdownConfigs.map((config) => (
-          <Dropdown
+          <DropDown
             key={config.type}
             type={config.type}
             label={config.label}

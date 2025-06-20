@@ -15,8 +15,8 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/signup" element={<SignupTest />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/home" element={<Search />} />
-        <Route path="/home2" element={<AddressDropdown />} />
+        <Route path="/home1" element={<Search />} />
+        <Route path="/home" element={<AddressDropdown />} />
       </Routes>
       <ToastContainer
         position="top-right"

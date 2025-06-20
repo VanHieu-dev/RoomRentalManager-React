@@ -62,6 +62,7 @@ export const handleSubmit = async (
 
     toast.success('Đăng ký thành công!');
     form.reset();
+    
     setErrors({});
 
     setTimeout(() => {

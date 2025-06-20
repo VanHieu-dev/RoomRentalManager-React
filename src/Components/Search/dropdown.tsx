@@ -1,6 +1,6 @@
-import type { DropdownProps } from "../../type";
+import type { AddressData, DropdownProps } from "../../type";
 
-const Dropdown = ({
+const DropDown = ({
   type,
   label,
   data,
@@ -11,6 +11,17 @@ const Dropdown = ({
   isOpen,
   toggleDropdown,
 }: DropdownProps) => {
+  const getId = (item: AddressData): string => {
+    if (type === 'province') return item.provinceId ?? '';
+    if (type === 'district') return item.districtId ?? '';
+    if (type === 'ward') return item.wardId ?? '';
+    return '';
+  };
+
+  const getName = (item: AddressData): string => {
+    return item.provinceName || item.districtName || item.wardName || '';
+  };
+
   return (
     <div className="relative">
       <label className="block mb-1 font-medium text-gray-700">{label}</label>
@@ -23,7 +34,7 @@ const Dropdown = ({
         type="button"
       >
         <span>
-          {selected?.name || `Chọn ${label.toLowerCase()}`}
+          {getName(selected || {}) || `Chọn ${label.toLowerCase()}`}
           {loading && ' (Đang tải...)'}
         </span>
         <svg
@@ -46,14 +57,14 @@ const Dropdown = ({
         <ul className="absolute z-10 mt-1 w-full bg-white border rounded-lg shadow-lg max-h-60 overflow-auto">
           {data.map((item) => (
             <li
-              key={item.code}
+              key={`${getId(item)}`}
               onClick={() => {
                 onSelect(item);
                 toggleDropdown(type);
               }}
               className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
             >
-              {item.name}
+              {getName(item)}
             </li>
           ))}
         </ul>
@@ -62,4 +73,4 @@ const Dropdown = ({
   );
 };
 
-export default Dropdown;
+export default DropDown;

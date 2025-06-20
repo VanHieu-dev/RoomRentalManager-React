@@ -1,6 +1,10 @@
 export interface AddressData {
-  code: string;
-  name: string;
+  provinceId?: string;
+  provinceName?: string;
+  districtId?: string;
+  districtName?: string;
+  wardId?: string;
+  wardName?: string;
 }
 
 export interface DropdownProps {
