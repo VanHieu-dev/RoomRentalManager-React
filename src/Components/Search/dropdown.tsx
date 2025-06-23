@@ -1,4 +1,4 @@
-import type { AddressData, DropdownProps } from "../../type";
+import type { AddressData, DropdownProps } from '../../type';
 
 const DropDown = ({
   type,
@@ -24,7 +24,9 @@ const DropDown = ({
 
   return (
     <div className="relative">
-      <label className="block mb-1 font-medium text-gray-700">{label}</label>
+      <label className="block text-lg font-semibold text-gray-900 px-2 py-1 rounded-md">
+        {label}
+      </label>
       <button
         onClick={() => !disabled && toggleDropdown(type)}
         className={`w-full flex justify-between items-center border rounded-lg px-4 py-3 bg-white shadow-sm hover:shadow focus:outline-none ${

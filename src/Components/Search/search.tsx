@@ -17,7 +17,7 @@ const Search = () => {
   const [loading, setLoading] = useState({
     province: false,
     district: false,
-    ward: false,
+    ward: false, 
   });
   const [dropdownOpen, setDropdownOpen] = useState({
     province: false,
@@ -30,7 +30,6 @@ const Search = () => {
   // Fetch provinces
   useEffect(() => {
     (async () => {
-      setLoading((l) => ({ ...l, province: true }));
       try {
         const res = await fetch('http://localhost:8080/api/provinces/getAll', {
           headers: {
@@ -41,8 +40,6 @@ const Search = () => {
         setProvinces(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error('Lỗi khi tải danh sách tỉnh/thành phố', err);
-      } finally {
-        setLoading((l) => ({ ...l, province: false }));
       }
     })();
   }, []);
@@ -51,7 +48,6 @@ const Search = () => {
   useEffect(() => {
     if (!selectedProvince?.provinceId) return;
     (async () => {
-      setLoading((l) => ({ ...l, district: true }));
       setSelectedDistrict(null);
       setSelectedWard(null);
       setWards([]);
@@ -68,8 +64,6 @@ const Search = () => {
         setDistricts(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error('Lỗi khi tải danh sách quận/huyện', err);
-      } finally {
-        setLoading((l) => ({ ...l, district: false }));
       }
     })();
   }, [selectedProvince]);
@@ -78,7 +72,6 @@ const Search = () => {
   useEffect(() => {
     if (!selectedDistrict?.districtId) return;
     (async () => {
-      setLoading((l) => ({ ...l, ward: true }));
       setSelectedWard(null);
       try {
         const res = await fetch(
@@ -95,8 +88,6 @@ const Search = () => {
         setWards(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error('Lỗi khi tải danh sách phường/xã', err);
-      } finally {
-        setLoading((l) => ({ ...l, ward: false }));
       }
     })();
   }, [selectedDistrict]);
@@ -171,7 +162,7 @@ const Search = () => {
 
   return (
     <div className="p-10 bg-white text-gray-800 font-sans">
-      <div className="space-y-6 max-w-sm dropdown-container">
+      <div className="space-y-3 w-[280px] dropdown-container">
         {dropdownConfigs.map((config) => (
           <DropDown
             key={config.type}
