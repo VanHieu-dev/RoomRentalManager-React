@@ -7,7 +7,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import Search from "./Components/Search/search";
 import AddressDropdown from "./Components/test";
 import SignupTest from "./pages/Singup";
-import Article from "./Components/Article/Article";
+import RoomList from "./Components/Article/RoomList";
 
 function App() {
   return (
@@ -18,7 +18,7 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/home1" element={<Search />} />
         <Route path="/home" element={<AddressDropdown />} />
-        <Route path="/Article" element={<Article />} />
+        <Route path="/Article" element={<RoomList />} />
 
       </Routes>
       <ToastContainer
