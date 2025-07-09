@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import ArticleHeader from './ArticleHeader';
-import ArticleDetails from './ArticleDetails';
+import AvatarComponent from './AvatarComponent';
+import ArticleContent from './ArticleContent';
 import ArticleImageGallery from './ArticleImageGallery';
 import ArticleActionButtonsFooter from './ArticleActionButtonsFooter';
 import { getToken } from '../../utils/auth';
-import { MapPin } from 'lucide-react';
 
 const Article: React.FC = () => {
   const [room, setRoom] = useState<any>(null);
@@ -27,7 +26,7 @@ const Article: React.FC = () => {
           'http://localhost:8080/api/rooms/search?provinceId=&districtId=&wardId=&minPrice=&maxPrice=&minArea=&maxArea=&page=1',
           { headers },
         );
-        const roomData = roomResponse.data.content[0]; // Lấy phòng đầu tiên
+        const roomData = roomResponse.data.content[0];
         setRoom(roomData);
 
         const utilitiesResponse = await axios.get(
@@ -35,15 +34,13 @@ const Article: React.FC = () => {
           { headers },
         );
         setUtilities(utilitiesResponse.data.utility);
-        
-        
+
         const mediaResponse = await axios.get(
           `http://localhost:8080/api/room-media/getByRoomId/${roomData.roomId}`,
           { headers },
         );
         setImages(mediaResponse.data.map((item: any) => item.mediaUrl));
-        console.log(images);
-        
+
         const addressResponse = await axios.get(
           `http://localhost:8080/api/addresses/getById/${roomData.addressId}`,
           { headers },
@@ -73,17 +70,18 @@ const Article: React.FC = () => {
 
   return (
     <div className="article max-w-2xl mx-auto p-4 bg-white rounded-lg shadow-md">
-      <ArticleHeader
+      {/* Phần avatar ở đầu */}
+      <AvatarComponent />
+
+      {/* Nội dung chính */}
+      <ArticleContent
         title={room.title}
         price={room.price}
         address={address.streetAddress + ', ' + address.wardAddress}
         utilities={utilities}
-        services={[]} // Chưa có API cung cấp
-        facilities={[]} // Chưa có API cung cấp
-      />
-      <ArticleDetails
         area={room.area}
-        utilities={utilities}
+        mapUrl={mapUrl}
+        maxOccupants={room.maxOccupants}
       />
       <ArticleImageGallery
         images={images}
@@ -91,22 +89,7 @@ const Article: React.FC = () => {
         showAllImages={showAllImages}
         onViewMore={handleViewMore}
       />
-      {mapUrl && (
-        <div className="mt-4 p-4 bg-gray-100 rounded flex items-center space-x-2">
-          <MapPin className="w-5 h-5 text-red-500" /> {/* Icon location */}
-          <a
-            href={mapUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 underline"
-          >
-            {address.streetAddress + ', ' + address.wardAddress}
-          </a>
-        </div>
-      )}
-      <ArticleActionButtonsFooter
-      />{' '}
-      {/* Tạm thời hardcode, cần API nếu có */}
+      <ArticleActionButtonsFooter />
       {isSlideshow && (
         <div
           className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50"
