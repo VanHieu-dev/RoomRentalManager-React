@@ -7,7 +7,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import Search from "./Components/Search/search";
 import AddressDropdown from "./Components/test";
 import SignupTest from "./pages/Singup";
-import RoomList from "./Components/Article/RoomList";
+import RoomList from "./Components/Room/RoomList";
 
 function App() {
   return (
