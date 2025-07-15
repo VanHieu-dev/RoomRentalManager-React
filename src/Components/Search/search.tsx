@@ -5,6 +5,13 @@ import { getToken } from '../../utils/auth';
 
 const token = getToken();
 
+const priceOptions = [
+  { label: '1 triệu - 2 triệu', value: { min: 1000000, max: 2000000 } },
+  { label: '2 triệu - 4 triệu', value: { min: 2000000, max: 4000000 } },
+  { label: '4 triệu - 8 triệu', value: { min: 4000000, max: 8000000 } },
+  { label: 'Lớn hơn 8 triệu', value: { min: 8000000, max: null } },
+];
+
 const Search = () => {
   const [provinces, setProvinces] = useState<AddressData[]>([]);
   const [districts, setDistricts] = useState<AddressData[]>([]);
@@ -17,13 +24,14 @@ const Search = () => {
     null,
   );
   const [selectedWard, setSelectedWard] = useState<AddressData | null>(null);
+  const [selectedPrice, setSelectedPrice] = useState(priceOptions[0].value);
 
   const [dropdownOpen, setDropdownOpen] = useState({
     province: false,
     district: false,
     ward: false,
+    price: false,
   });
-  const [fullAddress, setFullAddress] = useState<string>('Chưa chọn địa chỉ');
 
   // Fetch provinces
   useEffect(() => {
@@ -67,26 +75,12 @@ const Search = () => {
       .catch(() => setWards([]));
   }, [selectedDistrict]);
 
-  // Cập nhật địa chỉ khi cả ba cấp đều được chọn
-  useEffect(() => {
-    if (selectedProvince && selectedDistrict && selectedWard) {
-      setFullAddress(
-        [
-          selectedWard.wardName,
-          selectedDistrict.districtName,
-          selectedProvince.provinceName,
-        ].join(', '),
-      );
-    } else {
-      setFullAddress('Chưa chọn đầy đủ địa chỉ');
-    }
-  }, [selectedProvince, selectedDistrict, selectedWard]);
-
   const toggleDropdown = (type: keyof typeof dropdownOpen) => {
     setDropdownOpen({
       province: false,
       district: false,
       ward: false,
+      price: false,
       [type]: !dropdownOpen[type],
     });
   };
@@ -94,7 +88,12 @@ const Search = () => {
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (!(e.target as HTMLElement).closest('.dropdown-container')) {
-        setDropdownOpen({ province: false, district: false, ward: false });
+        setDropdownOpen({
+          province: false,
+          district: false,
+          ward: false,
+          price: false,
+        });
       }
     };
     document.addEventListener('mousedown', handler);
@@ -144,14 +143,72 @@ const Search = () => {
             toggleDropdown={toggleDropdown}
           />
         ))}
-        <div className="mt-6">
+        {/* Giá tiền */}
+        <div>
           <label className="block mb-1 font-medium text-gray-700">
-            Địa chỉ đã chọn:
+            Giá tiền
           </label>
-          <p className="border rounded-lg px-4 py-3 bg-gray-100">
-            {fullAddress}
-          </p>
+          <div className="relative">
+            <button
+              type="button"
+              className="w-full flex justify-between items-center border rounded-lg px-4 py-3 bg-white shadow-sm hover:shadow focus:outline-none"
+              onClick={() => toggleDropdown('price')}
+            >
+              <span>
+                {
+                  priceOptions.find(
+                    (opt) =>
+                      opt.value.min === selectedPrice.min &&
+                      opt.value.max === selectedPrice.max,
+                  )?.label
+                }
+              </span>
+              <svg
+                className={`w-5 h-5 text-gray-400 transition-transform ${
+                  dropdownOpen.price ? 'rotate-180' : ''
+                }`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </button>
+            {dropdownOpen.price && (
+              <ul className="absolute z-10 mt-1 w-full bg-white border rounded-lg shadow-lg max-h-60 overflow-auto">
+                {priceOptions.map((opt) => (
+                  <li
+                    key={opt.label}
+                    onClick={() => {
+                      setSelectedPrice(opt.value);
+                      toggleDropdown('price');
+                    }}
+                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                  >
+                    {opt.label}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
+        {/* Button tìm kiếm */}
+        <button
+          className="w-full mt-4 bg-blue-600 text-white font-bold px-4 py-3 rounded-lg shadow hover:bg-blue-700 transition"
+          type="button"
+          onClick={() => {
+            // TODO: Thực hiện tìm kiếm với các giá trị đã chọn
+            // Bạn có thể truyền selectedProvince, selectedDistrict, selectedWard, selectedPrice cho RoomList hoặc gọi API tại đây
+            alert('Đã nhấn tìm kiếm!');
+          }}
+        >
+          Tìm kiếm
+        </button>
       </div>
     </div>
   );

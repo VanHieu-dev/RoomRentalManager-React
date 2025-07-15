@@ -52,9 +52,9 @@ const DropDown = ({
       </button>
       {isOpen && (
         <ul className="absolute z-10 mt-1 w-full bg-white border rounded-lg shadow-lg max-h-60 overflow-auto">
-          {data.map((item) => (
+          {data.map((item, idx) => (
             <li
-              key={getId(item)}
+              key={getId(item) + '-' + idx} // Đảm bảo key duy nhất bằng cách kết hợp id và index
               onClick={() => {
                 onSelect(item);
                 toggleDropdown(type);
