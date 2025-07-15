@@ -4,7 +4,7 @@ export const isVideo = (url: string) => /\.(mp4|mov|webm|avi|mkv)$/i.test(url);
 export function renderGallery(images: { mediaUrl: string }[], setShowSlideshow: (v: boolean) => void, setCurrentIndex: (v: number) => void) {
   if (images.length === 0) return null;
   return (
-    <div className="w-full h-64 flex gap-2 mb-4">
+    <div className="w-full h-[315px] flex gap-2 mb-4">
       <div
         className="flex-1 h-full rounded-lg overflow-hidden cursor-pointer"
         onClick={() => { setShowSlideshow(true); setCurrentIndex(0); }}

@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { User, MapPin, Home, Ruler, Users, Phone, Heart } from 'lucide-react';
-import { renderGallery, renderSlideshow, isVideo } from '../../utils/RoomMediaUtils';
+import {
+  renderGallery,
+  renderSlideshow,
+  isVideo,
+} from '../../utils/RoomMediaUtils';
 
 interface RoomCardProps {
   room: {
@@ -21,7 +25,11 @@ const RoomCard: React.FC<RoomCardProps> = ({ room }) => {
   const [address, setAddress] = useState<any>(null);
   const [images, setImages] = useState<{ mediaUrl: string }[]>([]);
   const [utilities, setUtilities] = useState<string[]>([]);
-  const [owner, setOwner] = useState<{ name: string; avatar?: string; phone?: string } | null>(null);
+  const [owner, setOwner] = useState<{
+    name: string;
+    avatar?: string;
+    phone?: string;
+  } | null>(null);
   const [directionUrl, setDirectionUrl] = useState<string | null>(null);
   const [showSlideshow, setShowSlideshow] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -29,41 +37,61 @@ const RoomCard: React.FC<RoomCardProps> = ({ room }) => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    axios.get(`http://localhost:8080/api/addresses/getById/${room.addressId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(res => setAddress(res.data))
+
+    axios
+      .get(`http://localhost:8080/api/addresses/getById/${room.addressId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => setAddress(res.data))
       .catch(() => setAddress(null));
 
-    axios.get(`http://localhost:8080/api/room-media/getByRoomId/${room.roomId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(res => {
+    axios
+      .get(`http://localhost:8080/api/room-media/getByRoomId/${room.roomId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
         const mediaList = res.data;
         const videoItem = mediaList.find((item: any) => isVideo(item.mediaUrl));
-        const imageItems = mediaList.filter((item: any) => !isVideo(item.mediaUrl));
+        const imageItems = mediaList.filter(
+          (item: any) => !isVideo(item.mediaUrl),
+        );
         setImages(videoItem ? [videoItem, ...imageItems] : imageItems);
       })
       .catch(() => setImages([]));
 
-    axios.get(`http://localhost:8080/api/room-furniture/getByRoomId/${room.roomId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(res => setUtilities(res.data.utility || []))
+    axios
+      .get(
+        `http://localhost:8080/api/room-furniture/getByRoomId/${room.roomId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      )
+      .then((res) => setUtilities(res.data.utility || []))
       .catch(() => setUtilities([]));
 
     if (room.managerId) {
-      axios.get(`http://localhost:8080/api/managers/getById/${room.managerId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then(res => setOwner({ name: res.data.userName, avatar: res.data.avatar, phone: res.data.phone }))
+      axios
+        .get(`http://localhost:8080/api/managers/getById/${room.managerId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) =>
+          setOwner({
+            name: res.data.userName,
+            avatar: res.data.avatar,
+            phone: res.data.phone,
+          }),
+        )
         .catch(() => setOwner(null));
     }
 
-    axios.get(`http://localhost:8080/api/rooms/getDiractionUrl?roomId=${room.roomId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(res => setDirectionUrl(res.data))
+    axios
+      .get(
+        `http://localhost:8080/api/rooms/getDiractionUrl?roomId=${room.roomId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      )
+      .then((res) => setDirectionUrl(res.data))
       .catch(() => setDirectionUrl(null));
   }, [room]);
 
@@ -73,22 +101,34 @@ const RoomCard: React.FC<RoomCardProps> = ({ room }) => {
       <div className="flex items-center gap-3 px-6 pt-6 pb-2">
         <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center overflow-hidden">
           {owner?.avatar ? (
-            <img src={owner.avatar} alt={owner.name} className="w-full h-full object-cover" />
+            <img
+              src={owner.avatar}
+              alt={owner.name}
+              className="w-full h-full object-cover"
+            />
           ) : (
             <User className="w-7 h-7 text-blue-500" />
           )}
         </div>
         <div>
-          <div className="font-semibold text-gray-900">{owner?.name || 'Chủ phòng'}</div>
-          <div className="text-xs text-gray-500">{new Date(room.createdAt).toLocaleDateString('vi-VN')}</div>
+          <div className="font-semibold text-gray-900">
+            {owner?.name || 'Chủ phòng'}
+          </div>
+          <div className="text-xs text-gray-500">
+            {new Date(room.createdAt).toLocaleDateString('vi-VN')}
+          </div>
         </div>
       </div>
       {/* Tiêu đề bài viết */}
       <div className="px-6 pb-2">
-        <h2 className="font-extrabold text-2xl text-gray-900 tracking-tight">{room.title}</h2>
+        <h2 className="font-extrabold text-2xl text-gray-900 tracking-tight">
+          {room.title}
+        </h2>
       </div>
       {/* Gallery ảnh */}
-      <div className="px-6">{renderGallery(images, setShowSlideshow, setCurrentIndex)}</div>
+      <div className="px-6">
+        {renderGallery(images, setShowSlideshow, setCurrentIndex)}
+      </div>
       {/* Nội dung */}
       <div className="px-6 pb-4 font-sans">
         <div className="my-3 px-4 py-2 bg-gray-50 rounded-lg border border-dashed border-gray-200 flex items-center">
@@ -122,19 +162,28 @@ const RoomCard: React.FC<RoomCardProps> = ({ room }) => {
         <div className="mb-2 flex items-center">
           <Ruler className="w-4 h-4 mr-1 text-blue-500" />
           <span className="text-gray-700 text-base">Diện tích:</span>
-          <span className="ml-1 font-semibold text-gray-900 text-base">{room.area} m²</span>
+          <span className="ml-1 font-semibold text-gray-900 text-base">
+            {room.area} m²
+          </span>
         </div>
         <div className="mb-2 flex items-center">
           <Home className="w-4 h-4 mr-1 text-blue-500" />
           <span className="text-gray-700 text-base">Giá:</span>
           <span className="ml-1 font-bold text-red-600 text-lg">
-            {(room.price).toFixed()} Triệu/tháng
+            {room.price.toFixed()} Triệu/tháng
           </span>
         </div>
         <div className="mb-2 flex items-center">
           <Users className="w-4 h-4 mr-1 text-blue-500" />
           <span className="text-gray-700 text-base">Ở tối đa:</span>
-          <span className="ml-1 font-semibold text-gray-900 text-base">{room.maxOccupants} người</span>
+          <span className="ml-1 font-semibold text-gray-900 text-base">
+            {room.maxOccupants} người
+          </span>
+        </div>
+        {/* Thêm mô tả phòng ở cuối */}
+        <div className="mt-2 text-gray-800 text-base">
+          <span className="font-semibold">Mô tả phòng: </span>
+          {room.description || 'Chưa có mô tả.'}
         </div>
       </div>
       {/* Thanh action */}
@@ -150,7 +199,13 @@ const RoomCard: React.FC<RoomCardProps> = ({ room }) => {
         </button>
       </div>
       {/* Slideshow modal */}
-      {showSlideshow && renderSlideshow(images, currentIndex, setCurrentIndex, setShowSlideshow)}
+      {showSlideshow &&
+        renderSlideshow(
+          images,
+          currentIndex,
+          setCurrentIndex,
+          setShowSlideshow,
+        )}
       {/* Owner modal */}
       {showOwnerModal && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">

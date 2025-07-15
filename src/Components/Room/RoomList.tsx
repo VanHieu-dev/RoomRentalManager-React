@@ -32,14 +32,11 @@ const RoomList: React.FC = () => {
   }, []);
 
   return (
-    <div className="max-w-2xl mx-auto py-8 px-2">
-      <h1 className="text-3xl font-bold text-blue-700 mb-6 text-center">
-        Danh sách phòng trọ
-      </h1>
+    <div className="max-w-2xl mx-auto">
       {loading ? (
         <div className="text-center text-gray-500 py-10">Đang tải...</div>
       ) : (
-        <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-4">
           {rooms.map((room) => (
             <RoomCard
               key={room.roomId}

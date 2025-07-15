@@ -11,16 +11,11 @@ const DropDown = ({
   isOpen,
   toggleDropdown,
 }: DropdownProps) => {
-  const getId = (item: AddressData): string => {
-    if (type === 'province') return item.provinceId ?? '';
-    if (type === 'district') return item.districtId ?? '';
-    if (type === 'ward') return item.wardId ?? '';
-    return '';
-  };
+  const getId = (item: AddressData) =>
+    item.provinceId ?? item.districtId ?? item.wardId ?? '';
 
-  const getName = (item: AddressData): string => {
-    return item.provinceName || item.districtName || item.wardName || '';
-  };
+  const getName = (item: AddressData) =>
+    item.provinceName || item.districtName || item.wardName || '';
 
   return (
     <div className="relative">
@@ -59,7 +54,7 @@ const DropDown = ({
         <ul className="absolute z-10 mt-1 w-full bg-white border rounded-lg shadow-lg max-h-60 overflow-auto">
           {data.map((item) => (
             <li
-              key={`${getId(item)}`}
+              key={getId(item)}
               onClick={() => {
                 onSelect(item);
                 toggleDropdown(type);
