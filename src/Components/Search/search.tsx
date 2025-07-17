@@ -6,13 +6,25 @@ import { getToken } from '../../utils/auth';
 const token = getToken();
 
 const priceOptions = [
-  { label: '1 triệu - 2 triệu', value: { min: 1000000, max: 2000000 } },
-  { label: '2 triệu - 4 triệu', value: { min: 2000000, max: 4000000 } },
-  { label: '4 triệu - 8 triệu', value: { min: 4000000, max: 8000000 } },
-  { label: 'Lớn hơn 8 triệu', value: { min: 8000000, max: null } },
+  { label: '1 triệu - 2 triệu', value: { min: 1, max: 2 } },
+  { label: '2 triệu - 4 triệu', value: { min: 2, max: 4 } },
+  { label: '4 triệu - 8 triệu', value: { min: 4, max: 8 } },
+  { label: 'Lớn hơn 8 triệu', value: { min: 8, max: null } },
 ];
 
-const Search = () => {
+interface Filter {
+  provinceId: string;
+  districtId: string;
+  wardId: string;
+  minPrice: number | string | null;
+  maxPrice: number | string | null;
+}
+
+interface SearchProps {
+  setFilter: (filter: Filter) => void;
+}
+
+const Search = ({ setFilter }: SearchProps) => {
   const [provinces, setProvinces] = useState<AddressData[]>([]);
   const [districts, setDistricts] = useState<AddressData[]>([]);
   const [wards, setWards] = useState<AddressData[]>([]);
@@ -202,9 +214,13 @@ const Search = () => {
           className="w-full mt-4 bg-blue-600 text-white font-bold px-4 py-3 rounded-lg shadow hover:bg-blue-700 transition"
           type="button"
           onClick={() => {
-            // TODO: Thực hiện tìm kiếm với các giá trị đã chọn
-            // Bạn có thể truyền selectedProvince, selectedDistrict, selectedWard, selectedPrice cho RoomList hoặc gọi API tại đây
-            alert('Đã nhấn tìm kiếm!');
+            setFilter({
+              provinceId: selectedProvince?.provinceId || '',
+              districtId: selectedDistrict?.districtId || '',
+              wardId: selectedWard?.wardId || '',
+              minPrice: selectedPrice.min || '',
+              maxPrice: selectedPrice.max || '',
+            });
           }}
         >
           Tìm kiếm

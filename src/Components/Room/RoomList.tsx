@@ -14,47 +14,58 @@ interface Room {
   managerId?: number;
 }
 
-const RoomList: React.FC = () => {
+const RoomList: React.FC<{ filter: any }> = ({ filter }) => {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const loaderRef = useRef<HTMLDivElement | null>(null);
 
-  // Hàm tải dữ liệu từng trang
+  // Reset khi filter thay đổi
+  useEffect(() => {
+    setRooms([]);
+    setPage(1);
+    setHasMore(true);
+  }, [filter]);
+
+  // Hàm tải dữ liệu từng trang, loại bỏ phòng trùng roomId
   const fetchRooms = useCallback(
     async (pageNum: number) => {
       if (loading || !hasMore) return;
       setLoading(true);
       const token = localStorage.getItem('token');
       try {
-        console.log(
-          `http://localhost:8080/api/rooms/search?provinceId=&districtId=&wardId=&minPrice=&maxPrice=&minArea=&maxArea=&page=${pageNum}`,
-        );
-
+        // console.log(`http://localhost:8080/api/rooms/search?provinceId=${filter.provinceId}&districtId=${filter.districtId}&wardId=${filter.wardId}&minPrice=${filter.minPrice}&maxPrice=${filter.maxPrice}&minArea=&maxArea=&page=${pageNum}`);
+        
         const res = await axios.get(
-          `http://localhost:8080/api/rooms/search?provinceId=&districtId=&wardId=&minPrice=&maxPrice=&minArea=&maxArea=&page=${pageNum}`,
+          `http://localhost:8080/api/rooms/search?provinceId=${filter.provinceId}&districtId=${filter.districtId}&wardId=${filter.wardId}&minPrice=${filter.minPrice}&maxPrice=${filter.maxPrice}&minArea=&maxArea=&page=${pageNum}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           },
         );
         const newRooms = res.data.content || [];
-        setRooms((prev) => (pageNum === 1 ? newRooms : [...prev, ...newRooms]));
-        setHasMore(newRooms.length === 8); // Giả sử 8 là số lượng tối đa mỗi trang
+        setRooms((prev) => {
+          if (pageNum === 1) return newRooms;
+          const existingIds = new Set(prev.map((r) => r.roomId));
+          const filteredNewRooms = newRooms.filter(
+            (r: { roomId: number; }) => !existingIds.has(r.roomId),
+          );
+          return [...prev, ...filteredNewRooms];
+        });
+        setHasMore(newRooms.length > 0);
       } catch (error) {
-        console.error('Error fetching rooms:', error);
         setHasMore(false);
       } finally {
         setLoading(false);
       }
     },
-    [loading, hasMore],
+    [loading, hasMore, filter],
   );
 
-  // Tải trang đầu tiên
+  // Tải dữ liệu khi page thay đổi
   useEffect(() => {
-    fetchRooms(1);
-  },[]);
+    fetchRooms(page);
+  }, [page, fetchRooms]);
 
   // Infinite scroll với Intersection Observer
   useEffect(() => {
@@ -62,14 +73,14 @@ const RoomList: React.FC = () => {
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting) {
+        if (entries[0].isIntersecting && hasMore && !loading) {
           setPage((prev) => prev + 1);
         }
       },
       {
-        root: null, // Sử dụng viewport làm root
-        rootMargin: '200px', // Tải dữ liệu khi loaderRef cách viewport 200px
-        threshold: 0, // Kích hoạt ngay khi loaderRef xuất hiện
+        root: null,
+        rootMargin: '200px',
+        threshold: 0,
       },
     );
 
@@ -83,12 +94,6 @@ const RoomList: React.FC = () => {
       }
     };
   }, [hasMore, loading]);
-
-  // Tải dữ liệu khi page thay đổi
-  useEffect(() => {
-    if (page === 1) return;
-    fetchRooms(page);
-  }, [page, fetchRooms]);
 
   return (
     <div className="max-w-2xl mx-auto px-2">

@@ -141,13 +141,13 @@ const RoomCard: React.FC<RoomCardProps> = ({ room }) => {
               className="underline text-base text-black font-medium hover:text-blue-700"
             >
               {address
-                ? `${address.streetAddress}, ${address.wardAddress}, ${address.districtAddress}, ${address.provinceAddress}`
+                ? `${address.streetAddress}, ${address.wardAddress}`
                 : 'Đang tải địa chỉ...'}
             </a>
           ) : (
             <span className="underline text-base text-black font-medium">
               {address
-                ? `${address.streetAddress}, ${address.wardAddress}, ${address.districtAddress}, ${address.provinceAddress}`
+                ? `${address.streetAddress}, ${address.wardAddress}`
                 : 'Đang tải địa chỉ...'}
             </span>
           )}

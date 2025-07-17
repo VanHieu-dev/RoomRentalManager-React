@@ -8,7 +8,7 @@ import Search from "./Components/Search/search";
 import AddressDropdown from "./Components/test";
 import SignupTest from "./pages/Singup";
 import RoomList from "./Components/Room/RoomList";
-import Home from "./Components/Home";
+import Home from "./pages/Home";
 
 function App() {
   return (
@@ -17,9 +17,14 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/signup" element={<SignupTest />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/home1" element={<Search />} />
+        <Route
+          path="/home1"
+          element={
+            <Search setFilter={() => {}} />
+          }
+        />
         <Route path="/home" element={<Home />} />
-        <Route path="/Article" element={<RoomList />} />
+        <Route path="/Article" element={<RoomList filter={null} />} />
 
       </Routes>
       <ToastContainer

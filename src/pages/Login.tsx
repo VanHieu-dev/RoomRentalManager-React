@@ -38,7 +38,7 @@ const Login = () => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        username: form.username.value, // Sử dụng username thay vì email
+        username: form.username.value, 
         password: form.password.value,
       }),
     })
@@ -56,16 +56,16 @@ const Login = () => {
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
         const payload = JSON.parse(atob(base64));
 
-        console.log(payload);
-
+        // console.log(payload);
+        localStorage.setItem("username", payload.sub || payload.username);
         //Lấy ra role
         const role = payload.roles[0] || 'ROLE_USER';
 
         // Điều hướng dựa trên vai trò
         if (role === 'ROLE_USER' ||  role === 'ROLE_ADMIN') {
-          navigate('/home1'); 
+          navigate('/Home'); 
         } else if (role === 'ROLE_MANAGER') {
-          navigate('/home');
+          navigate('/Home');
         }
         setErrors({});
       })
