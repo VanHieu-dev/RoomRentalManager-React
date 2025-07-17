@@ -5,10 +5,11 @@ import Login from "./pages/Login";
 // import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
 import Search from "./Components/Search/search";
-import AddressDropdown from "./Components/test";
+// import AddressDropdown from "./Components/test";
 import SignupTest from "./pages/Singup";
 import RoomList from "./Components/Room/RoomList";
 import Home from "./pages/Home";
+import Dashboard2 from "./pages/Dashboard2";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         />
         <Route path="/home" element={<Home />} />
         <Route path="/Article" element={<RoomList filter={null} />} />
+        <Route path="/dashboard" element={<Dashboard2/>} />
 
       </Routes>
       <ToastContainer

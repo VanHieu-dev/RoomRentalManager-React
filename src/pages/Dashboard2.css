@@ -1,0 +1,251 @@
+:root {
+  --primary-color: #6c5ce7;
+  --primary-hover: #5649c0;
+  --text-primary: #000000;
+  --text-secondary: #000000;
+  --bg-light: #f8f9fa;
+  --bg-white: #ffffff;
+  --border-color: #dfe6e9;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+html,
+body {
+  background-color: #e2e5e9;
+  margin: 0;
+  padding: 0;
+  color: #000000;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #e2e5e9;
+  color: #000000;
+}
+
+.main-content {
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 0 20px;
+  display: flex;
+  gap: 5px;
+  align-items: flex-start;
+  background-color: #e2e5e9;
+  min-height: calc(100vh - 100px);
+  color: #000000;
+}
+
+.left-sidebar {
+  width: 300px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 20px;
+}
+
+.posts-feed {
+  flex: 1;
+  min-width: 0;
+  background: var(--bg-white);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 20px;
+  margin-top: 0;
+  border: 1px solid var(--border-color);
+  color: #000000;
+}
+
+/* Styles cho UserIntro */
+.user-intro-container {
+  background: var(--bg-white);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 16px;
+  height: auto;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  margin-top: 0;
+  border: 1px solid var(--border-color);
+  color: #000000;
+  font-family: "Roboto", "Noto Sans", "Open Sans", sans-serif;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #000000;
+  margin-bottom: 16px;
+  margin-top: 0;
+  letter-spacing: 0.3px;
+  font-family: "Roboto", "Noto Sans", "Open Sans", sans-serif;
+}
+
+.user-bio {
+  margin-bottom: 20px;
+  color: #000000;
+  line-height: 1.6;
+  font-family: "Roboto", "Noto Sans", "Open Sans", sans-serif;
+}
+
+.bio-quote {
+  font-size: 15px;
+  color: #000000;
+  margin-bottom: 8px;
+  font-style: italic;
+  line-height: 1.5;
+  font-family: "Roboto", "Noto Sans", "Open Sans", sans-serif;
+}
+
+.bio-link {
+  color: #1877f2;
+  text-decoration: none;
+  font-size: 14px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.info-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  color: #000000;
+  font-size: 14px;
+  line-height: 1.5;
+  font-family: "Roboto", "Noto Sans", "Open Sans", sans-serif;
+}
+
+.info-item i {
+  width: 20px;
+  color: #666;
+  font-size: 16px;
+}
+
+.info-item p {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
+}
+
+.info-item .highlight {
+  color: #333;
+  font-weight: 600;
+}
+
+.edit-button {
+  background: #f0f2f5;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1c1e21;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom: 16px;
+  transition: background-color 0.2s ease;
+  font-family: "Roboto", "Noto Sans", "Open Sans", sans-serif;
+}
+
+.edit-button:hover {
+  background: #e4e6eb;
+}
+
+.image-gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.featured-img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+/* Styles cho posts feed */
+.post-item {
+  background-color: var(--bg-white);
+  color: #000000;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+  height: calc(28.75rem + 20px);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.post-item:first-child {
+  margin-top: 0;
+}
+
+.post-item img {
+  margin-top: 10px;
+  border-radius: 8px;
+}
+
+.post-images-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.post-image-item {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+/* Styles cho header */
+.header {
+  background: var(--bg-white);
+  box-shadow: var(--shadow);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.btn.primary {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.btn.primary:hover {
+  background-color: var(--primary-hover);
+}
+
+.btn.gray {
+  background-color: var(--bg-light);
+  color: var(--text-primary);
+}
+
+.btn.gray:hover {
+  background-color: var(--border-color);
+}
+
+.tab-btn {
+  color: var(--text-secondary);
+}
+
+.tab-btn:hover {
+  background-color: var(--bg-light);
+}
+
+.tab-btn.active {
+  background-color: var(--primary-color);
+  color: white;
+}
