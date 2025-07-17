@@ -9,7 +9,8 @@ import Search from "./Components/Search/search";
 import SignupTest from "./pages/Singup";
 import RoomList from "./Components/Room/RoomList";
 import Home from "./pages/Home";
-import Dashboard2 from "./pages/Dashboard2";
+import DashBoard from "./Components/Manager/DashBoard";
+
 
 function App() {
   return (
@@ -26,8 +27,7 @@ function App() {
         />
         <Route path="/home" element={<Home />} />
         <Route path="/Article" element={<RoomList filter={null} />} />
-        <Route path="/dashboard" element={<Dashboard2/>} />
-
+        <Route path="/dashboard" element={<DashBoard />} />
       </Routes>
       <ToastContainer
         position="top-right"
