@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import axios from 'axios';
 import RoomCard from './RoomCard';
+import RoomCardSkeleton from '../RoomCardSkeleton';
 
 interface Room {
   roomId: number;
@@ -28,32 +29,28 @@ const RoomList: React.FC<{ filter: any }> = ({ filter }) => {
     setHasMore(true);
   }, [filter]);
 
-  // Hàm tải dữ liệu từng trang, loại bỏ phòng trùng roomId
+  // Tải dữ liệu từng trang, loại bỏ phòng trùng roomId
   const fetchRooms = useCallback(
     async (pageNum: number) => {
       if (loading || !hasMore) return;
       setLoading(true);
       const token = localStorage.getItem('token');
       try {
-        // console.log(`http://localhost:8080/api/rooms/search?provinceId=${filter.provinceId}&districtId=${filter.districtId}&wardId=${filter.wardId}&minPrice=${filter.minPrice}&maxPrice=${filter.maxPrice}&minArea=&maxArea=&page=${pageNum}`);
-        
         const res = await axios.get(
           `http://localhost:8080/api/rooms/search?provinceId=${filter.provinceId}&districtId=${filter.districtId}&wardId=${filter.wardId}&minPrice=${filter.minPrice}&maxPrice=${filter.maxPrice}&minArea=&maxArea=&page=${pageNum}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          },
+          { headers: { Authorization: `Bearer ${token}` } },
         );
         const newRooms = res.data.content || [];
         setRooms((prev) => {
           if (pageNum === 1) return newRooms;
           const existingIds = new Set(prev.map((r) => r.roomId));
-          const filteredNewRooms = newRooms.filter(
-            (r: { roomId: number; }) => !existingIds.has(r.roomId),
-          );
-          return [...prev, ...filteredNewRooms];
+          return [
+            ...prev,
+            ...newRooms.filter((r: Room) => !existingIds.has(r.roomId)),
+          ];
         });
         setHasMore(newRooms.length > 0);
-      } catch (error) {
+      } catch {
         setHasMore(false);
       } finally {
         setLoading(false);
@@ -67,46 +64,39 @@ const RoomList: React.FC<{ filter: any }> = ({ filter }) => {
     fetchRooms(page);
   }, [page, fetchRooms]);
 
-  // Infinite scroll với Intersection Observer
+  // Infinite scroll
   useEffect(() => {
     if (!hasMore || loading) return;
-
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !loading) {
           setPage((prev) => prev + 1);
         }
       },
-      {
-        root: null,
-        rootMargin: '200px',
-        threshold: 0,
-      },
+      { root: null, rootMargin: '200px', threshold: 0 },
     );
-
-    if (loaderRef.current) {
-      observer.observe(loaderRef.current);
-    }
-
+    if (loaderRef.current) observer.observe(loaderRef.current);
     return () => {
-      if (loaderRef.current) {
-        observer.unobserve(loaderRef.current);
-      }
+      if (loaderRef.current) observer.unobserve(loaderRef.current);
     };
   }, [hasMore, loading]);
 
   return (
-    <div className="max-w-2xl mx-auto px-2">
+    <div className="max-w-2xl w-full mx-auto px-0">
       <div className="flex flex-col gap-4">
-        {rooms.map((room) => (
-          <RoomCard
-            key={room.roomId}
-            room={room}
-          />
-        ))}
+        {loading && rooms.length === 0
+          ? Array.from({ length: 3 }).map((_, idx) => (
+              <RoomCardSkeleton key={idx} />
+            ))
+          : rooms.map((room) => (
+              <RoomCard
+                key={room.roomId}
+                room={room}
+              />
+            ))}
       </div>
       <div ref={loaderRef} />
-      {loading && (
+      {loading && rooms.length > 0 && (
         <div className="text-center text-gray-500 py-6">Đang tải...</div>
       )}
       {!hasMore && !loading && (

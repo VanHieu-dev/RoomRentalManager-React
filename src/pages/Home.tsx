@@ -17,12 +17,12 @@ const Home: React.FC = () => {
       <Header />
       <div className="flex justify-center px-8">
         {/* Cột trái: Search */}
-        <div className="w-[320px] flex-shrink-0 mr-6">
+        <div className="w-[320px] flex-shrink-0 mr-6 sticky top-8 self-start z-10">
           <Search setFilter={setFilter} />
         </div>
         {/* Cột giữa: RoomList */}
         <div className="flex justify-center">
-          <div className="w-full">
+          <div className="max-w-2xl w-full">
             <RoomList filter={filter} />
           </div>
         </div>
