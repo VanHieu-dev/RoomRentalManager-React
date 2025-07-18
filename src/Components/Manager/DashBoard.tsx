@@ -1,6 +1,8 @@
 import React, { useState, useEffect, type ChangeEvent } from 'react';
 import './DashBorad.css';
 import { jwtDecode } from 'jwt-decode';
+import '@fortawesome/fontawesome-free/css/all.min.css';
+
 
 // Định nghĩa interface cho thông tin manager
 interface ManagerInfo {
