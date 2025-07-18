@@ -8,6 +8,7 @@ interface ManagerInfo {
   email: string;
   phone: string;
   address: string;
+  managerId: number; // Sửa thành number
 }
 
 // Định nghĩa interface cho dữ liệu token giải mã
@@ -21,6 +22,7 @@ interface ManagerApiResponse {
   email: string;
   phone: string;
   address: string;
+  managerId: number; // Thêm managerId vào API response
 }
 
 // Định nghĩa interface cho room
@@ -101,7 +103,8 @@ const DashBoard: React.FC = () => {
     userName: '',
     email: '',
     phone: '',
-    address: ''
+    address: '',
+    managerId: 0 // Khởi tạo mặc định
   });
   const [rooms, setRooms] = useState<Room[]>([]);
 
@@ -132,7 +135,8 @@ const DashBoard: React.FC = () => {
           userName: data.userName || 'Unknown',
           email: data.email || 'No email provided',
           phone: data.phone || 'No phone provided',
-          address: data.address || 'No address provided'
+          address: data.address || 'No address provided',
+          managerId: data.managerId || 0
         });
       } catch (error) {
         console.error('Error fetching manager info:', error);
@@ -147,7 +151,12 @@ const DashBoard: React.FC = () => {
           return;
         }
 
-        const roomsResponse = await fetch('http://localhost:8080/api/rooms/search/by-manager-id?id=3', {
+        if (!managerInfo.managerId) {
+          console.error('Manager ID not available');
+          return;
+        }
+
+        const roomsResponse = await fetch(`http://localhost:8080/api/rooms/search/by-manager-id?id=${managerInfo.managerId}`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -221,9 +230,11 @@ const DashBoard: React.FC = () => {
     };
 
     fetchManagerInfo();
-    fetchRooms();
+    if (managerInfo.managerId) {
+      fetchRooms();
+    }
     fetchProvinces();
-  }, []);
+  }, [managerInfo.managerId]);
 
   useEffect(() => {
     if (selectedProvince) {
@@ -326,9 +337,14 @@ const DashBoard: React.FC = () => {
         return;
       }
 
+      if (!managerInfo.managerId) {
+        console.error('Manager ID not available');
+        return;
+      }
+
       // Tạo phòng mới
       const roomData = {
-        managerId: 3,
+        managerId: managerInfo.managerId,
         title: formData.title,
         description: formData.description,
         price: parseFloat(formData.price),
@@ -388,7 +404,7 @@ const DashBoard: React.FC = () => {
       }
 
       // Làm mới danh sách phòng
-      const roomsResponse = await fetch('http://localhost:8080/api/rooms/search/by-manager-id?id=3', {
+      const roomsResponse = await fetch(`http://localhost:8080/api/rooms/search/by-manager-id?id=${managerInfo.managerId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
