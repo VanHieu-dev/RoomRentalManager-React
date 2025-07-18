@@ -6,6 +6,7 @@ import { getToken } from '../../utils/auth';
 const token = getToken();
 
 const priceOptions = [
+  { label: 'Chọn giá tiền', value: { min: '', max: '' } },
   { label: '1 triệu - 2 triệu', value: { min: 1, max: 2 } },
   { label: '2 triệu - 4 triệu', value: { min: 2, max: 4 } },
   { label: '4 triệu - 8 triệu', value: { min: 4, max: 8 } },
@@ -28,7 +29,6 @@ const Search = ({ setFilter }: SearchProps) => {
   const [provinces, setProvinces] = useState<AddressData[]>([]);
   const [districts, setDistricts] = useState<AddressData[]>([]);
   const [wards, setWards] = useState<AddressData[]>([]);
-
   const [selectedProvince, setSelectedProvince] = useState<AddressData | null>(
     null,
   );
@@ -37,7 +37,6 @@ const Search = ({ setFilter }: SearchProps) => {
   );
   const [selectedWard, setSelectedWard] = useState<AddressData | null>(null);
   const [selectedPrice, setSelectedPrice] = useState(priceOptions[0].value);
-
   const [dropdownOpen, setDropdownOpen] = useState({
     province: false,
     district: false,
@@ -63,9 +62,7 @@ const Search = ({ setFilter }: SearchProps) => {
     setWards([]);
     fetch(
       `http://localhost:8080/api/districts/getByProvince/${selectedProvince.provinceId}`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      },
+      { headers: { Authorization: `Bearer ${token}` } },
     )
       .then((res) => res.json())
       .then((data) => setDistricts(Array.isArray(data) ? data : []))
@@ -78,25 +75,14 @@ const Search = ({ setFilter }: SearchProps) => {
     setSelectedWard(null);
     fetch(
       `http://localhost:8080/api/wards/getByDistrict/${selectedDistrict.districtId}`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      },
+      { headers: { Authorization: `Bearer ${token}` } },
     )
       .then((res) => res.json())
       .then((data) => setWards(Array.isArray(data) ? data : []))
       .catch(() => setWards([]));
   }, [selectedDistrict]);
 
-  const toggleDropdown = (type: keyof typeof dropdownOpen) => {
-    setDropdownOpen({
-      province: false,
-      district: false,
-      ward: false,
-      price: false,
-      [type]: !dropdownOpen[type],
-    });
-  };
-
+  // Dropdown outside click handler
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (!(e.target as HTMLElement).closest('.dropdown-container')) {
@@ -111,6 +97,16 @@ const Search = ({ setFilter }: SearchProps) => {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
+
+  const toggleDropdown = (type: keyof typeof dropdownOpen) => {
+    setDropdownOpen({
+      province: false,
+      district: false,
+      ward: false,
+      price: false,
+      [type]: !dropdownOpen[type],
+    });
+  };
 
   const dropdownConfigs = [
     {
@@ -193,18 +189,20 @@ const Search = ({ setFilter }: SearchProps) => {
             </button>
             {dropdownOpen.price && (
               <ul className="absolute z-10 mt-1 w-full bg-white border rounded-lg shadow-lg max-h-60 overflow-auto">
-                {priceOptions.map((opt) => (
-                  <li
-                    key={opt.label}
-                    onClick={() => {
-                      setSelectedPrice(opt.value);
-                      toggleDropdown('price');
-                    }}
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                  >
-                    {opt.label}
-                  </li>
-                ))}
+                {priceOptions
+                  .slice(1) // Bỏ option đầu tiên "Chọn giá tiền"
+                  .map((opt) => (
+                    <li
+                      key={opt.label}
+                      onClick={() => {
+                        setSelectedPrice(opt.value);
+                        toggleDropdown('price');
+                      }}
+                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    >
+                      {opt.label}
+                    </li>
+                  ))}
               </ul>
             )}
           </div>

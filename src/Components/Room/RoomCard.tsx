@@ -37,14 +37,15 @@ const RoomCard: React.FC<RoomCardProps> = ({ room }) => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-
+    // Fetch address
     axios
       .get(`http://localhost:8080/api/addresses/getById/${room.addressId}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setAddress(res.data))
       .catch(() => setAddress(null));
-
+    
+    // Fetch media
     axios
       .get(`http://localhost:8080/api/room-media/getByRoomId/${room.roomId}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -58,7 +59,7 @@ const RoomCard: React.FC<RoomCardProps> = ({ room }) => {
         setImages(videoItem ? [videoItem, ...imageItems] : imageItems);
       })
       .catch(() => setImages([]));
-
+    // Fetch utilities
     axios
       .get(
         `http://localhost:8080/api/room-furniture/getByRoomId/${room.roomId}`,
@@ -68,7 +69,7 @@ const RoomCard: React.FC<RoomCardProps> = ({ room }) => {
       )
       .then((res) => setUtilities(res.data.utility || []))
       .catch(() => setUtilities([]));
-
+    // Fetch owner
     if (room.managerId) {
       axios
         .get(`http://localhost:8080/api/managers/getById/${room.managerId}`, {
@@ -83,7 +84,7 @@ const RoomCard: React.FC<RoomCardProps> = ({ room }) => {
         )
         .catch(() => setOwner(null));
     }
-
+    // Fetch direction url
     axios
       .get(
         `http://localhost:8080/api/rooms/getDiractionUrl?roomId=${room.roomId}`,
@@ -97,7 +98,7 @@ const RoomCard: React.FC<RoomCardProps> = ({ room }) => {
 
   return (
     <div className="bg-white rounded-xl shadow-md mb-8 max-w-2xl mx-auto border border-gray-100 flex flex-col">
-      {/* Header: Avatar + Tên + Ngày + Tiêu đề */}
+      {/* Header */}
       <div className="flex items-center gap-3 px-6 pt-6 pb-2">
         <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center overflow-hidden">
           {owner?.avatar ? (
@@ -119,17 +120,17 @@ const RoomCard: React.FC<RoomCardProps> = ({ room }) => {
           </div>
         </div>
       </div>
-      {/* Tiêu đề bài viết */}
+      {/* Title */}
       <div className="px-6 pb-2">
         <h2 className="font-extrabold text-2xl text-gray-900 tracking-tight">
           {room.title}
         </h2>
       </div>
-      {/* Gallery ảnh */}
+      {/* Gallery */}
       <div className="px-6">
         {renderGallery(images, setShowSlideshow, setCurrentIndex)}
       </div>
-      {/* Nội dung */}
+      {/* Info */}
       <div className="px-6 pb-4 font-sans">
         <div className="my-3 px-4 py-2 bg-gray-50 rounded-lg border border-dashed border-gray-200 flex items-center">
           <MapPin className="w-5 h-5 mr-2 text-red-600 flex-shrink-0" />
@@ -141,13 +142,25 @@ const RoomCard: React.FC<RoomCardProps> = ({ room }) => {
               className="underline text-base text-black font-medium hover:text-blue-700"
             >
               {address
-                ? `${address.streetAddress}, ${address.wardAddress}`
+                ? [
+                    address.streetAddress,
+                    address.wardAddress,
+                  ]
+                    .filter(Boolean)
+                    .join(', ')
                 : 'Đang tải địa chỉ...'}
             </a>
           ) : (
             <span className="underline text-base text-black font-medium">
               {address
-                ? `${address.streetAddress}, ${address.wardAddress}`
+                ? [
+                    address.streetAddress,
+                    address.wardAddress,
+                    address.districtAddress,
+                    address.provinceAddress,
+                  ]
+                    .filter(Boolean)
+                    .join(', ')
                 : 'Đang tải địa chỉ...'}
             </span>
           )}
@@ -180,13 +193,12 @@ const RoomCard: React.FC<RoomCardProps> = ({ room }) => {
             {room.maxOccupants} người
           </span>
         </div>
-        {/* Thêm mô tả phòng ở cuối */}
         <div className="mt-2 text-gray-800 text-base">
           <span className="font-semibold">Mô tả phòng: </span>
           {room.description || 'Chưa có mô tả.'}
         </div>
       </div>
-      {/* Thanh action */}
+      {/* Actions */}
       <div className="flex border-t px-6 py-3 text-gray-600 text-base justify-center gap-32">
         <button className="flex items-center gap-2 hover:text-red-600 transition">
           <Heart className="w-5 h-5" /> Lưu
