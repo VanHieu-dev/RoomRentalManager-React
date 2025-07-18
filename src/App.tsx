@@ -5,10 +5,12 @@ import Login from "./pages/Login";
 // import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
 import Search from "./Components/Search/search";
-import AddressDropdown from "./Components/test";
+// import AddressDropdown from "./Components/test";
 import SignupTest from "./pages/Singup";
 import RoomList from "./Components/Room/RoomList";
 import Home from "./pages/Home";
+import DashBoard from "./Components/Manager/DashBoard";
+
 
 function App() {
   return (
@@ -25,7 +27,7 @@ function App() {
         />
         <Route path="/home" element={<Home />} />
         <Route path="/Article" element={<RoomList filter={null} />} />
-
+        <Route path="/dashboard" element={<DashBoard />} />
       </Routes>
       <ToastContainer
         position="top-right"
