@@ -8,6 +8,7 @@ interface ManagerInfo {
   email: string;
   phone: string;
   address: string;
+  managerId: number; // Sửa thành number
 }
 
 // Định nghĩa interface cho dữ liệu token giải mã
@@ -21,6 +22,7 @@ interface ManagerApiResponse {
   email: string;
   phone: string;
   address: string;
+  managerId: number; // Thêm managerId vào API response
 }
 
 // Định nghĩa interface cho room
@@ -94,7 +96,7 @@ const DashBoard: React.FC = () => {
     price: '',
     area: '',
     maxOccupants: '',
-    streetAddress: '',
+    streetAddress: ''
   });
   const [files, setFiles] = useState<File[]>([]);
   const [managerInfo, setManagerInfo] = useState<ManagerInfo>({
@@ -102,6 +104,7 @@ const DashBoard: React.FC = () => {
     email: '',
     phone: '',
     address: '',
+    managerId: 0 // Khởi tạo mặc định
   });
   const [rooms, setRooms] = useState<Room[]>([]);
 
@@ -117,15 +120,12 @@ const DashBoard: React.FC = () => {
         const decoded: DecodedToken = jwtDecode(token);
         const managerName = decoded.sub;
 
-        const response = await fetch(
-          `http://localhost:8080/api/managers/getByName?managerName=${managerName}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
-
+        const response = await fetch(`http://localhost:8080/api/managers/getByName?managerName=${managerName}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+      
         if (!response.ok) {
           throw new Error('Failed to fetch manager info');
         }
@@ -136,6 +136,7 @@ const DashBoard: React.FC = () => {
           email: data.email || 'No email provided',
           phone: data.phone || 'No phone provided',
           address: data.address || 'No address provided',
+          managerId: data.managerId || 0
         });
       } catch (error) {
         console.error('Error fetching manager info:', error);
@@ -150,14 +151,16 @@ const DashBoard: React.FC = () => {
           return;
         }
 
-        const roomsResponse = await fetch(
-          'http://localhost:8080/api/rooms/search/by-manager-id?id=3',
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
+        if (!managerInfo.managerId) {
+          console.error('Manager ID not available');
+          return;
+        }
+
+        const roomsResponse = await fetch(`http://localhost:8080/api/rooms/search/by-manager-id?id=${managerInfo.managerId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
 
         if (!roomsResponse.ok) {
           throw new Error('Failed to fetch rooms');
@@ -165,54 +168,40 @@ const DashBoard: React.FC = () => {
 
         const roomsData: Room[] = await roomsResponse.json();
 
-        const roomsWithDetails = await Promise.all(
-          roomsData.map(async (room) => {
-            try {
-              const addressResponse = await fetch(
-                `http://localhost:8080/api/addresses/getById/${room.addressId}`,
-                {
-                  headers: {
-                    Authorization: `Bearer ${token}`,
-                  },
-                },
-              );
-              const addressData: Address = await addressResponse.json();
+        const roomsWithDetails = await Promise.all(roomsData.map(async (room) => {
+          try {
+            const addressResponse = await fetch(`http://localhost:8080/api/addresses/getById/${room.addressId}`, {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            });
+            const addressData: Address = await addressResponse.json();
 
-              const mediaResponse = await fetch(
-                `http://localhost:8080/api/room-media/getByRoomId/${room.roomId}`,
-                {
-                  headers: {
-                    Authorization: `Bearer ${token}`,
-                  },
-                },
-              );
-              const mediaData: Media[] = await mediaResponse.json();
+            const mediaResponse = await fetch(`http://localhost:8080/api/room-media/getByRoomId/${room.roomId}`, {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            });
+            const mediaData: Media[] = await mediaResponse.json();
 
-              const furnitureResponse = await fetch(
-                `http://localhost:8080/api/room-furniture/getByRoomId/${room.roomId}`,
-                {
-                  headers: {
-                    Authorization: `Bearer ${token}`,
-                  },
-                },
-              );
-              const furnitureData = await furnitureResponse.json();
+            const furnitureResponse = await fetch(`http://localhost:8080/api/room-furniture/getByRoomId/${room.roomId}`, {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            });
+            const furnitureData = await furnitureResponse.json();
 
-              return {
-                ...room,
-                address: addressData,
-                media: mediaData,
-                furniture: furnitureData.utility,
-              };
-            } catch (error) {
-              console.error(
-                `Error fetching details for room ${room.roomId}:`,
-                error,
-              );
-              return room;
-            }
-          }),
-        );
+            return {
+              ...room,
+              address: addressData,
+              media: mediaData,
+              furniture: furnitureData.utility
+            };
+          } catch (error) {
+            console.error(`Error fetching details for room ${room.roomId}:`, error);
+            return room;
+          }
+        }));
 
         setRooms(roomsWithDetails);
       } catch (error) {
@@ -227,14 +216,11 @@ const DashBoard: React.FC = () => {
           console.error('Token not found in localStorage');
           return;
         }
-        const response = await fetch(
-          'http://localhost:8080/api/provinces/getAll',
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
+        const response = await fetch('http://localhost:8080/api/provinces/getAll', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
         if (!response.ok) throw new Error('Failed to fetch provinces');
         const data: Province[] = await response.json();
         setProvinces(data);
@@ -244,9 +230,11 @@ const DashBoard: React.FC = () => {
     };
 
     fetchManagerInfo();
-    fetchRooms();
+    if (managerInfo.managerId) {
+      fetchRooms();
+    }
     fetchProvinces();
-  }, []);
+  }, [managerInfo.managerId]);
 
   useEffect(() => {
     if (selectedProvince) {
@@ -257,14 +245,11 @@ const DashBoard: React.FC = () => {
             console.error('Token not found in localStorage');
             return;
           }
-          const response = await fetch(
-            `http://localhost:8080/api/districts/getByProvince/${selectedProvince}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            },
-          );
+          const response = await fetch(`http://localhost:8080/api/districts/getByProvince/${selectedProvince}`, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
           if (!response.ok) throw new Error('Failed to fetch districts');
           const data: District[] = await response.json();
           setDistricts(data);
@@ -288,14 +273,11 @@ const DashBoard: React.FC = () => {
             console.error('Token not found in localStorage');
             return;
           }
-          const response = await fetch(
-            `http://localhost:8080/api/wards/getByDistrict/${selectedDistrict}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            },
-          );
+          const response = await fetch(`http://localhost:8080/api/wards/getByDistrict/${selectedDistrict}`, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
           if (!response.ok) throw new Error('Failed to fetch wards');
           const data: Ward[] = await response.json();
           setWards(data);
@@ -310,7 +292,7 @@ const DashBoard: React.FC = () => {
 
   const toggleAmenity = (amenity: string): void => {
     if (amenities.includes(amenity)) {
-      setAmenities(amenities.filter((item) => item !== amenity));
+      setAmenities(amenities.filter(item => item !== amenity));
     } else {
       setAmenities([...amenities, amenity]);
     }
@@ -325,7 +307,7 @@ const DashBoard: React.FC = () => {
         price: '',
         area: '',
         maxOccupants: '',
-        streetAddress: '',
+        streetAddress: ''
       });
       setFiles([]);
       setSelectedProvince('');
@@ -335,11 +317,9 @@ const DashBoard: React.FC = () => {
     }
   };
 
-  const handleInputChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ): void => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
     const { id, value } = e.target;
-    setFormData((prev) => ({ ...prev, [id]: value }));
+    setFormData(prev => ({ ...prev, [id]: value }));
   };
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>): void => {
@@ -348,9 +328,7 @@ const DashBoard: React.FC = () => {
     }
   };
 
-  const handleSubmit = async (
-    e: React.FormEvent<HTMLFormElement>,
-  ): Promise<void> => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
@@ -359,31 +337,31 @@ const DashBoard: React.FC = () => {
         return;
       }
 
+      if (!managerInfo.managerId) {
+        console.error('Manager ID not available');
+        return;
+      }
+
       // Tạo phòng mới
       const roomData = {
-        managerId: 3,
+        managerId: managerInfo.managerId,
         title: formData.title,
         description: formData.description,
         price: parseFloat(formData.price),
         area: parseFloat(formData.area),
-        maxOccupants: formData.maxOccupants
-          ? parseInt(formData.maxOccupants)
-          : 1,
+        maxOccupants: formData.maxOccupants ? parseInt(formData.maxOccupants) : 1,
         streetAddress: formData.streetAddress,
-        wardId: parseInt(selectedWard),
+        wardId: parseInt(selectedWard)
       };
 
-      const roomResponse = await fetch(
-        'http://localhost:8080/api/rooms/create',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(roomData),
+      const roomResponse = await fetch('http://localhost:8080/api/rooms/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
         },
-      );
+        body: JSON.stringify(roomData)
+      });
 
       if (!roomResponse.ok) throw new Error('Failed to create room');
       const roomResult = await roomResponse.json();
@@ -392,19 +370,16 @@ const DashBoard: React.FC = () => {
       // Tải lên media
       if (files.length > 0) {
         const formData = new FormData();
-        files.forEach((file) => formData.append('files', file));
+        files.forEach(file => formData.append('files', file));
         formData.append('roomId', roomId.toString());
 
-        const mediaResponse = await fetch(
-          `http://localhost:8080/api/room-media/create?roomId=${roomId}`,
-          {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-            body: formData,
+        const mediaResponse = await fetch(`http://localhost:8080/api/room-media/create?roomId=${roomId}`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`
           },
-        );
+          body: formData
+        });
 
         if (!mediaResponse.ok) throw new Error('Failed to upload media');
       }
@@ -413,83 +388,62 @@ const DashBoard: React.FC = () => {
       if (amenities.length > 0) {
         const furnitureData = {
           roomId: roomId,
-          furnitureName: amenities,
+          furnitureName: amenities
         };
 
-        const furnitureResponse = await fetch(
-          'http://localhost:8080/api/room-furniture/create',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify(furnitureData),
+        const furnitureResponse = await fetch('http://localhost:8080/api/room-furniture/create', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
           },
-        );
+          body: JSON.stringify(furnitureData)
+        });
 
-        if (!furnitureResponse.ok)
-          throw new Error('Failed to create furniture');
+        if (!furnitureResponse.ok) throw new Error('Failed to create furniture');
       }
 
       // Làm mới danh sách phòng
-      const roomsResponse = await fetch(
-        'http://localhost:8080/api/rooms/search/by-manager-id?id=3',
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
+      const roomsResponse = await fetch(`http://localhost:8080/api/rooms/search/by-manager-id?id=${managerInfo.managerId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
       const roomsData: Room[] = await roomsResponse.json();
-      const roomsWithDetails = await Promise.all(
-        roomsData.map(async (room) => {
-          try {
-            const addressResponse = await fetch(
-              `http://localhost:8080/api/addresses/getById/${room.addressId}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              },
-            );
-            const addressData: Address = await addressResponse.json();
+      const roomsWithDetails = await Promise.all(roomsData.map(async (room) => {
+        try {
+          const addressResponse = await fetch(`http://localhost:8080/api/addresses/getById/${room.addressId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+          const addressData: Address = await addressResponse.json();
 
-            const mediaResponse = await fetch(
-              `http://localhost:8080/api/room-media/getByRoomId/${room.roomId}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              },
-            );
-            const mediaData: Media[] = await mediaResponse.json();
+          const mediaResponse = await fetch(`http://localhost:8080/api/room-media/getByRoomId/${room.roomId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+          const mediaData: Media[] = await mediaResponse.json();
 
-            const furnitureResponse = await fetch(
-              `http://localhost:8080/api/room-furniture/getByRoomId/${room.roomId}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              },
-            );
-            const furnitureData = await furnitureResponse.json();
+          const furnitureResponse = await fetch(`http://localhost:8080/api/room-furniture/getByRoomId/${room.roomId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+          const furnitureData = await furnitureResponse.json();
 
-            return {
-              ...room,
-              address: addressData,
-              media: mediaData,
-              furniture: furnitureData.utility,
-            };
-          } catch (error) {
-            console.error(
-              `Error fetching details for room ${room.roomId}:`,
-              error,
-            );
-            return room;
-          }
-        }),
-      );
+          return {
+            ...room,
+            address: addressData,
+            media: mediaData,
+            furniture: furnitureData.utility
+          };
+        } catch (error) {
+          console.error(`Error fetching details for room ${room.roomId}:`, error);
+          return room;
+        }
+      }));
       setRooms(roomsWithDetails);
 
       // Reset form và đóng
@@ -500,7 +454,7 @@ const DashBoard: React.FC = () => {
         price: '',
         area: '',
         maxOccupants: '',
-        streetAddress: '',
+        streetAddress: ''
       });
       setFiles([]);
       setSelectedProvince('');
@@ -518,15 +472,13 @@ const DashBoard: React.FC = () => {
         <div className="container">
           <div className="header-content">
             <div className="user-info">
-              <img
-                src="https://readdy.ai/api/search-image?query=professional%20portrait%20photo%20of%20a%20Vietnamese%20real%20estate%20manager%2C%20male%2C%2035%20years%20old%2C%20wearing%20business%20casual%20attire%2C%20friendly%20smile%2C%20high%20quality%20professional%20headshot%20with%20neutral%20background%2C%20photorealistic&width=80&height=80&seq=1&orientation=squarish"
-                alt="Avatar"
+              <img 
+                src="https://readdy.ai/api/search-image?query=professional%20portrait%20photo%20of%20a%20Vietnamese%20real%20estate%20manager%2C%20male%2C%2035%20years%20old%2C%20wearing%20business%20casual%20attire%2C%20friendly%20smile%2C%20high%20quality%20professional%20headshot%20with%20neutral%20background%2C%20photorealistic&width=80&height=80&seq=1&orientation=squarish" 
+                alt="Avatar" 
                 className="avatar"
               />
               <div>
-                <h1 className="user-name">
-                  {localStorage.getItem('username') || managerInfo.userName}
-                </h1>
+                <h1 className="user-name">{managerInfo.userName}</h1>
                 <p className="user-role">Chủ trọ</p>
               </div>
             </div>
@@ -579,7 +531,7 @@ const DashBoard: React.FC = () => {
       <main className="main-content">
         <div className="post-header">
           <h2 className="section-title">Danh sách bài đăng</h2>
-          <button
+          <button 
             onClick={handlePostFormToggle}
             className="post-new-button"
           >
@@ -592,16 +544,11 @@ const DashBoard: React.FC = () => {
             <h3 className="form-title">Đăng tin mới</h3>
             <form onSubmit={handleSubmit}>
               <div className="form-group">
-                <label
-                  className="form-label"
-                  htmlFor="title"
-                >
-                  Tiêu đề
-                </label>
-                <input
-                  type="text"
+                <label className="form-label" htmlFor="title">Tiêu đề</label>
+                <input 
+                  type="text" 
                   id="title"
-                  className="form-input"
+                  className="form-input" 
                   placeholder="Nhập tiêu đề bài đăng"
                   value={formData.title}
                   onChange={handleInputChange}
@@ -622,10 +569,7 @@ const DashBoard: React.FC = () => {
                     style={{ display: 'none' }}
                     id="file-upload"
                   />
-                  <label
-                    htmlFor="file-upload"
-                    className="upload-button"
-                  >
+                  <label htmlFor="file-upload" className="upload-button">
                     Chọn ảnh từ máy tính
                   </label>
                 </div>
@@ -633,80 +577,50 @@ const DashBoard: React.FC = () => {
 
               <div className="form-grid">
                 <div>
-                  <label
-                    className="form-label"
-                    htmlFor="province"
-                  >
-                    Tỉnh/Thành phố
-                  </label>
-                  <select
+                  <label className="form-label" htmlFor="province">Tỉnh/Thành phố</label>
+                  <select 
                     id="province"
                     className="form-select"
                     value={selectedProvince}
-                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                      setSelectedProvince(e.target.value)
-                    }
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedProvince(e.target.value)}
                   >
                     <option value="">Chọn Tỉnh/Thành phố</option>
-                    {provinces.map((province) => (
-                      <option
-                        key={province.provinceId}
-                        value={province.provinceId}
-                      >
+                    {provinces.map(province => (
+                      <option key={province.provinceId} value={province.provinceId}>
                         {province.provinceName}
                       </option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label
-                    className="form-label"
-                    htmlFor="district"
-                  >
-                    Quận/Huyện
-                  </label>
-                  <select
+                  <label className="form-label" htmlFor="district">Quận/Huyện</label>
+                  <select 
                     id="district"
                     className="form-select"
                     value={selectedDistrict}
-                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                      setSelectedDistrict(e.target.value)
-                    }
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedDistrict(e.target.value)}
                     disabled={!selectedProvince}
                   >
                     <option value="">Chọn Quận/Huyện</option>
-                    {districts.map((district) => (
-                      <option
-                        key={district.districtId}
-                        value={district.districtId}
-                      >
+                    {districts.map(district => (
+                      <option key={district.districtId} value={district.districtId}>
                         {district.districtName}
                       </option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label
-                    className="form-label"
-                    htmlFor="ward"
-                  >
-                    Phường/Xã
-                  </label>
-                  <select
+                  <label className="form-label" htmlFor="ward">Phường/Xã</label>
+                  <select 
                     id="ward"
                     className="form-select"
                     value={selectedWard}
-                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                      setSelectedWard(e.target.value)
-                    }
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedWard(e.target.value)}
                     disabled={!selectedDistrict}
                   >
                     <option value="">Chọn Phường/Xã</option>
-                    {wards.map((ward) => (
-                      <option
-                        key={ward.wardId}
-                        value={ward.wardId}
-                      >
+                    {wards.map(ward => (
+                      <option key={ward.wardId} value={ward.wardId}>
                         {ward.wardName}
                       </option>
                     ))}
@@ -715,16 +629,11 @@ const DashBoard: React.FC = () => {
               </div>
 
               <div className="form-group">
-                <label
-                  className="form-label"
-                  htmlFor="streetAddress"
-                >
-                  Địa chỉ đường
-                </label>
-                <input
-                  type="text"
+                <label className="form-label" htmlFor="streetAddress">Địa chỉ đường</label>
+                <input 
+                  type="text" 
                   id="streetAddress"
-                  className="form-input"
+                  className="form-input" 
                   placeholder="VD: 569 đường Đông La"
                   value={formData.streetAddress}
                   onChange={handleInputChange}
@@ -733,48 +642,33 @@ const DashBoard: React.FC = () => {
 
               <div className="form-grid">
                 <div>
-                  <label
-                    className="form-label"
-                    htmlFor="price"
-                  >
-                    Giá phòng (VNĐ/tháng)
-                  </label>
-                  <input
-                    type="text"
+                  <label className="form-label" htmlFor="price">Giá phòng (VNĐ/tháng)</label>
+                  <input 
+                    type="text" 
                     id="price"
-                    className="form-input"
+                    className="form-input" 
                     placeholder="VD: 1200000"
                     value={formData.price}
                     onChange={handleInputChange}
                   />
                 </div>
                 <div>
-                  <label
-                    className="form-label"
-                    htmlFor="area"
-                  >
-                    Diện tích (m²)
-                  </label>
-                  <input
-                    type="text"
+                  <label className="form-label" htmlFor="area">Diện tích (m²)</label>
+                  <input 
+                    type="text" 
                     id="area"
-                    className="form-input"
+                    className="form-input" 
                     placeholder="VD: 30.5"
                     value={formData.area}
                     onChange={handleInputChange}
                   />
                 </div>
                 <div>
-                  <label
-                    className="form-label"
-                    htmlFor="maxOccupants"
-                  >
-                    Số người ở tối đa
-                  </label>
-                  <input
-                    type="number"
+                  <label className="form-label" htmlFor="maxOccupants">Số người ở tối đa</label>
+                  <input 
+                    type="number" 
                     id="maxOccupants"
-                    className="form-input"
+                    className="form-input" 
                     placeholder="VD: 3"
                     value={formData.maxOccupants}
                     onChange={handleInputChange}
@@ -785,46 +679,24 @@ const DashBoard: React.FC = () => {
               <div className="form-group">
                 <label className="form-label">Nội thất</label>
                 <div className="amenities-grid">
-                  {[
-                    'Điều hòa',
-                    'Máy giặt',
-                    'Tủ lạnh',
-                    'Bàn ghế',
-                    'Giường',
-                    'Tủ quần áo',
-                    'Bếp',
-                    'Nhà vệ sinh riêng',
-                  ].map((item) => (
-                    <div
-                      key={item}
-                      className="amenity-item"
-                    >
-                      <input
-                        type="checkbox"
-                        id={item}
+                  {['Điều hòa', 'Máy giặt', 'Tủ lạnh', 'Bàn ghế', 'Giường', 'Tủ quần áo', 'Bếp', 'Nhà vệ sinh riêng'].map((item) => (
+                    <div key={item} className="amenity-item">
+                      <input 
+                        type="checkbox" 
+                        id={item} 
                         checked={amenities.includes(item)}
                         onChange={() => toggleAmenity(item)}
-                        className="amenity-checkbox"
+                        className="amenity-checkbox" 
                       />
-                      <label
-                        htmlFor={item}
-                        className="amenity-label"
-                      >
-                        {item}
-                      </label>
+                      <label htmlFor={item} className="amenity-label">{item}</label>
                     </div>
                   ))}
                 </div>
               </div>
 
               <div className="form-group">
-                <label
-                  className="form-label"
-                  htmlFor="description"
-                >
-                  Mô tả thêm
-                </label>
-                <textarea
+                <label className="form-label" htmlFor="description">Mô tả thêm</label>
+                <textarea 
                   id="description"
                   className="form-textarea"
                   placeholder="Nhập mô tả chi tiết về phòng trọ..."
@@ -834,15 +706,15 @@ const DashBoard: React.FC = () => {
               </div>
 
               <div className="form-actions">
-                <button
-                  type="button"
+                <button 
+                  type="button" 
                   onClick={handlePostFormToggle}
                   className="cancel-button"
                 >
                   Hủy
                 </button>
-                <button
-                  type="submit"
+                <button 
+                  type="submit" 
                   className="submit-button"
                 >
                   Đăng bài
@@ -854,27 +726,14 @@ const DashBoard: React.FC = () => {
 
         <div className="post-grid">
           {rooms.map((room) => (
-            <div
-              key={room.roomId}
-              className="post-item"
-            >
+            <div key={room.roomId} className="post-item">
               <div className="post-image-container">
-                <img
-                  src={
-                    room.media?.find(
-                      (m) =>
-                        m.mediaUrl.endsWith('.png') ||
-                        m.mediaUrl.endsWith('.jpg'),
-                    )?.mediaUrl || 'https://via.placeholder.com/400x250'
-                  }
-                  alt={room.title}
+                <img 
+                  src={room.media?.find(m => m.mediaUrl.endsWith('.png') || m.mediaUrl.endsWith('.jpg'))?.mediaUrl || 'https://via.placeholder.com/400x250'} 
+                  alt={room.title} 
                   className="post-image"
                 />
-                <span
-                  className={`post-status ${
-                    room.isActive ? 'active' : 'inactive'
-                  }`}
-                >
+                <span className={`post-status ${room.isActive ? 'active' : 'inactive'}`}>
                   {room.isActive ? 'Đang hiển thị' : 'Đã ẩn'}
                 </span>
               </div>
@@ -882,11 +741,7 @@ const DashBoard: React.FC = () => {
                 <div className="post-header">
                   <h3 className="post-title">{room.title}</h3>
                   <div className="post-menu">
-                    <button
-                      className="menu-button"
-                      aria-label="Mở menu tùy chọn"
-                      title="Mở menu tùy chọn"
-                    >
+                    <button className="menu-button" aria-label="Mở menu tùy chọn" title="Mở menu tùy chọn">
                       <i className="fas fa-ellipsis-v"></i>
                     </button>
                     <div className="menu-dropdown">
@@ -894,11 +749,7 @@ const DashBoard: React.FC = () => {
                         <i className="fas fa-edit menu-icon"></i>Chỉnh sửa
                       </button>
                       <button className="menu-item">
-                        <i
-                          className={`fas fa-${
-                            room.isActive ? 'eye-slash' : 'eye'
-                          } menu-icon`}
-                        ></i>
+                        <i className={`fas fa-${room.isActive ? 'eye-slash' : 'eye'} menu-icon`}></i>
                         {room.isActive ? 'Ẩn bài đăng' : 'Hiện bài đăng'}
                       </button>
                     </div>
@@ -906,17 +757,13 @@ const DashBoard: React.FC = () => {
                 </div>
                 <p className="post-address">
                   <i className="fas fa-map-marker-alt address-icon"></i>
-                  {room.address
-                    ? `${room.address.streetAddress}, ${room.address.wardAddress}`
-                    : 'Đang tải địa chỉ...'}
+                  {room.address ? `${room.address.streetAddress}, ${room.address.wardAddress}` : 'Đang tải địa chỉ...'}
                 </p>
-
+                
                 <div className="post-details">
                   <div className="detail-item">
                     <i className="fas fa-money-bill-wave detail-icon"></i>
-                    <span className="detail-value">
-                      {room.price.toLocaleString('vi-VN')}đ
-                    </span>
+                    <span className="detail-value">{room.price.toLocaleString('vi-VN')}đ</span>
                   </div>
                   <div className="detail-item">
                     <i className="fas fa-expand detail-icon"></i>
@@ -927,27 +774,12 @@ const DashBoard: React.FC = () => {
                     <span>{room.maxOccupants} người</span>
                   </div>
                 </div>
-
+                
                 <div className="post-amenities">
                   {room.furniture?.map((item) => (
-                    <span
-                      key={item}
-                      className="amenity-tag"
-                    >
-                      <i
-                        className={`fas fa-${
-                          item === 'fridge'
-                            ? 'snowflake'
-                            : item === 'kitchen'
-                            ? 'utensils'
-                            : 'couch'
-                        } amenity-icon`}
-                      ></i>
-                      {item === 'fridge'
-                        ? 'Tủ lạnh'
-                        : item === 'kitchen'
-                        ? 'Bếp'
-                        : item}
+                    <span key={item} className="amenity-tag">
+                      <i className={`fas fa-${item === 'fridge' ? 'snowflake' : item === 'kitchen' ? 'utensils' : 'couch'} amenity-icon`}></i>
+                      {item === 'fridge' ? 'Tủ lạnh' : item === 'kitchen' ? 'Bếp' : item}
                     </span>
                   ))}
                 </div>
@@ -958,21 +790,13 @@ const DashBoard: React.FC = () => {
 
         <div className="pagination">
           <nav className="pagination-nav">
-            <button
-              className="pagination-button"
-              aria-label="Trang trước"
-              title="Trang trước"
-            >
+            <button className="pagination-button" aria-label="Trang trước" title="Trang trước">
               <i className="fas fa-chevron-left"></i>
             </button>
             <button className="pagination-button active">1</button>
             <button className="pagination-button">2</button>
             <button className="pagination-button">3</button>
-            <button
-              className="pagination-button"
-              aria-label="Trang sau"
-              title="Trang sau"
-            >
+            <button className="pagination-button" aria-label="Trang sau" title="Trang sau">
               <i className="fas fa-chevron-right"></i>
             </button>
           </nav>
