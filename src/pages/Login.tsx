@@ -65,7 +65,7 @@ const Login = () => {
         if (role === 'ROLE_USER' ||  role === 'ROLE_ADMIN') {
           navigate('/Home'); 
         } else if (role === 'ROLE_MANAGER') {
-          navigate('/Home');
+          navigate('/dashboard');
         }
         setErrors({});
       })
