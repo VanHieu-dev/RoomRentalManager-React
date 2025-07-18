@@ -38,40 +38,41 @@ const Login = () => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        username: form.username.value, 
+        username: form.username.value,
         password: form.password.value,
       }),
     })
       .then((response) => {
         if (!response.ok) {
+          // Nếu backend trả về 500, coi như sai tài khoản/mật khẩu
+          if (response.status === 500) {
+            throw new Error('Tài khoản hoặc mật khẩu không đúng');
+          }
           throw new Error('Đăng nhập thất bại');
         }
         return response.json();
       })
       .then((data) => {
-        localStorage.setItem("token", data.token); 
-
-        console.log(data.token.split('.'));
-        const base64Url = data.token.split('.')[1]; // Phần payload
+        localStorage.setItem('token', data.token);
+        const base64Url = data.token.split('.')[1];
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
         const payload = JSON.parse(atob(base64));
-
-        // console.log(payload);
-        localStorage.setItem("username", payload.sub || payload.username);
-        //Lấy ra role
+        localStorage.setItem('username', payload.sub || payload.username);
         const role = payload.roles[0] || 'ROLE_USER';
-
-        // Điều hướng dựa trên vai trò
-        if (role === 'ROLE_USER' ||  role === 'ROLE_ADMIN') {
-          navigate('/Home'); 
+        if (role === 'ROLE_USER' || role === 'ROLE_ADMIN') {
+          navigate('/Home');
         } else if (role === 'ROLE_MANAGER') {
           navigate('/dashboard');
         }
         setErrors({});
       })
       .catch((error) => {
-        console.error('Error:', error);
-        setErrors({ general: 'Có lỗi xảy ra, vui lòng thử lại sau' });
+        // Nếu là lỗi tài khoản/mật khẩu thì báo đúng thông báo
+        if (error.message === 'Tài khoản hoặc mật khẩu không đúng') {
+          setErrors({ general: 'Tài khoản hoặc mật khẩu không đúng' });
+        } else {
+          setErrors({ general: 'Có lỗi xảy ra, vui lòng thử lại sau' });
+        }
       });
   };
 
@@ -86,7 +87,11 @@ const Login = () => {
         <h2 className="text-center font-extrabold text-[30px] text-[#1089d3]">
           Đăng Nhập
         </h2>
-        <form className="mt-5 space-y-4" onSubmit={handleSubmit} noValidate>
+        <form
+          className="mt-5 space-y-4"
+          onSubmit={handleSubmit}
+          noValidate
+        >
           <div>
             <input
               required
@@ -95,7 +100,9 @@ const Login = () => {
               placeholder="Username" // Thay placeholder "E-mail" thành "Username"
               className="w-full bg-white border-none p-4 rounded-[20px] shadow-[0_10px_10px_-5px_#cff0ff] focus:outline-none focus:border-x-2 focus:border-cyan-500 placeholder:text-gray-400"
               onChange={handleChange}
-              onInvalid={(e: React.InvalidEvent<HTMLInputElement>) => e.preventDefault()}
+              onInvalid={(e: React.InvalidEvent<HTMLInputElement>) =>
+                e.preventDefault()
+              }
             />
             {errors.username && ( // Thay errors.email thành errors.username
               <p className="text-red-500 text-sm mt-1">{errors.username}</p>
@@ -109,7 +116,9 @@ const Login = () => {
               placeholder="Password"
               className="w-full bg-white border-none p-4 rounded-[20px] shadow-[0_10px_10px_-5px_#cff0ff] focus:outline-none focus:border-x-2 focus:border-cyan-500 placeholder:text-gray-400"
               onChange={handleChange}
-              onInvalid={(e: React.InvalidEvent<HTMLInputElement>) => e.preventDefault()}
+              onInvalid={(e: React.InvalidEvent<HTMLInputElement>) =>
+                e.preventDefault()
+              }
             />
             {errors.password && (
               <p className="text-red-500 text-sm mt-1">{errors.password}</p>
@@ -129,7 +138,10 @@ const Login = () => {
         </form>
         <div className="text-center mt-4 text-xs text-[#0099ff]">
           <span>Chưa có tài khoản? </span>
-          <Link to="/signup" className="underline">
+          <Link
+            to="/signup"
+            className="underline"
+          >
             Đăng Ký
           </Link>
         </div>

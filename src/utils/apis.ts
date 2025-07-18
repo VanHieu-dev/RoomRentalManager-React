@@ -6,7 +6,7 @@ export const handleSubmit = async (
   isLandlord: boolean,
   navigate: any,
   setErrors: React.Dispatch<React.SetStateAction<FormErrors>>,
-  toast: any
+  toast: any,
 ) => {
   e.preventDefault();
   const form = e.currentTarget;
@@ -39,7 +39,7 @@ export const handleSubmit = async (
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
-      }
+      },
     );
 
     const data = await response.json();
@@ -60,14 +60,48 @@ export const handleSubmit = async (
       return;
     }
 
+    // Sau khi đăng ký thành công:
     toast.success('Đăng ký thành công!');
+
+    // Gọi lại API đăng nhập với username và password vừa đăng ký
+    fetch('http://localhost:8080/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: formData.userName,
+        password: formData.password,
+      }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Đăng nhập tự động thất bại');
+        }
+        return response.json();
+      })
+      .then((data) => {
+        localStorage.setItem('token', data.token);
+        const base64Url = data.token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const payload = JSON.parse(atob(base64));
+        localStorage.setItem('username', payload.sub || payload.username);
+        const role = payload.roles[0] || 'ROLE_USER';
+        if (role === 'ROLE_MANAGER') {
+          navigate('/dashboard');
+        } else {
+          navigate('/Home');
+        }
+      })
+      .catch(() => {
+        // Nếu đăng nhập tự động thất bại, chuyển về trang đăng nhập
+        navigate('/Login');
+      });
     form.reset();
-    
+
     setErrors({});
 
-    setTimeout(() => {
-      navigate('/');
-    }, 2000);
+    // setTimeout(() => {
+    //   navigate('/');
+    // }, 2000);
   } catch (err) {
     setErrors({ general: 'Có lỗi xảy ra, vui lòng thử lại sau' });
   }

@@ -41,15 +41,33 @@ const RoomList: React.FC<{ filter: any }> = ({ filter }) => {
           { headers: { Authorization: `Bearer ${token}` } },
         );
         const newRooms = res.data.content || [];
-        setRooms((prev) => {
-          if (pageNum === 1) return newRooms;
-          const existingIds = new Set(prev.map((r) => r.roomId));
-          return [
-            ...prev,
-            ...newRooms.filter((r: Room) => !existingIds.has(r.roomId)),
-          ];
-        });
-        setHasMore(newRooms.length > 0);
+        if (
+          newRooms.length === 0 &&
+          pageNum === 1 &&
+          (filter.provinceId ||
+            filter.districtId ||
+            filter.wardId ||
+            filter.minPrice ||
+            filter.maxPrice)
+        ) {
+          // Nếu không có kết quả, gọi lại API với filter rỗng để lấy danh sách mặc định
+          const resDefault = await axios.get(
+            `http://localhost:8080/api/rooms/search?page=1`,
+            { headers: { Authorization: `Bearer ${token}` } },
+          );
+          setRooms(resDefault.data.content || []);
+          setHasMore((resDefault.data.content || []).length > 0);
+        } else {
+          setRooms((prev) => {
+            if (pageNum === 1) return newRooms;
+            const existingIds = new Set(prev.map((r) => r.roomId));
+            return [
+              ...prev,
+              ...newRooms.filter((r: Room) => !existingIds.has(r.roomId)),
+            ];
+          });
+          setHasMore(newRooms.length > 0);
+        }
       } catch {
         setHasMore(false);
       } finally {

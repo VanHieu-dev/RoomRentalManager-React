@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 const Header = () => {
   const navigate = useNavigate();
   const username = localStorage.getItem('username') || 'Tài khoản';
-  const avatar = localStorage.getItem('avatar'); // Lấy avatar từ localStorage nếu có
+  const avatar = localStorage.getItem('avatar');
   const token = localStorage.getItem('token');
   let isManager = false;
 
@@ -17,21 +17,12 @@ const Header = () => {
     }
   }
 
-  const handleUserClick = () => {
-    if (isManager) {
-      navigate('/dashboard');
-    }
-  };
-
   return (
     <header className="w-full flex items-center justify-between px-8 py-4 bg-white shadow-sm mb-6">
       <div className="text-2xl font-bold text-blue-700">
         Room Rental Manager
       </div>
-      <div
-        className="flex items-center gap-2 cursor-pointer"
-        onClick={handleUserClick}
-      >
+      <div className="flex items-center gap-2 select-none">
         {avatar ? (
           <img
             src={avatar}
@@ -39,7 +30,6 @@ const Header = () => {
             className="w-8 h-8 rounded-full object-cover border"
           />
         ) : (
-          // fallback nếu không có avatar
           <div className="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center font-bold text-blue-700">
             {username[0]}
           </div>

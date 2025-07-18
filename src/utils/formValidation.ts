@@ -39,7 +39,7 @@ export const validateForm = (form: HTMLFormElement): FormErrors => {
   const isLandlord = landlordCheckbox?.checked || false;
 
   if (isLandlord) {
-    ['address', 'cmnd', 'extraContact'].forEach((field) => {
+    ['address', 'cmnd'].forEach((field) => {
       if (!form[field]?.value?.trim()) {
         errors[field as keyof FormErrors] = `Vui lòng nhập ${
           field === 'cmnd' ? 'CMND/CCCD' : field
