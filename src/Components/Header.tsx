@@ -1,5 +1,6 @@
 import { UserCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import LogoutButton from './LogOut';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -35,6 +36,7 @@ const Header = () => {
           </div>
         )}
         <span className="font-semibold text-gray-700">{username}</span>
+        <LogoutButton />
       </div>
     </header>
   );
