@@ -19,11 +19,15 @@ const Header = () => {
   }
 
   return (
-    <header className="w-full flex items-center justify-between px-8 py-4 bg-white shadow-sm mb-6">
-      <div className="text-2xl font-bold text-blue-700">
-        Room Rental Manager
+    <header className="w-full relative flex items-center px-8 py-4 bg-white shadow-sm mb-6">
+      {/* Tiêu đề căn giữa tuyệt đối */}
+      <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2">
+        <div className="text-3xl font-bold bg-gradient-to-r from-[#1089d3] to-[#12b1d1] bg-clip-text text-transparent select-none">
+          Tìm phòng trọ giá rẻ
+        </div>
       </div>
-      <div className="flex items-center gap-2 select-none">
+      {/* Tài khoản và nút đăng xuất giữ nguyên bên phải */}
+      <div className="flex items-center gap-2 select-none ml-auto">
         {avatar ? (
           <img
             src={avatar}

@@ -209,7 +209,7 @@ const Search = ({ setFilter }: SearchProps) => {
         </div>
         {/* Button tìm kiếm */}
         <button
-          className="w-full mt-4 bg-blue-600 text-white font-bold px-4 py-3 rounded-lg shadow hover:bg-blue-700 transition"
+          className="w-full font-bold bg-gradient-to-r from-[#1089d3] to-[#12b1d1] text-white py-2 rounded-[20px] shadow-[0_20px_10px_-15px_rgba(133,189,215,0.88)] transition transform hover:scale-105 hover:shadow-[0_23px_10px_-20px_rgba(133,189,215,0.88)] active:scale-95 active:shadow-[0_15px_10px_-10px_rgba(133,189,215,0.88)] mt-4"
           type="button"
           onClick={() => {
             setFilter({
